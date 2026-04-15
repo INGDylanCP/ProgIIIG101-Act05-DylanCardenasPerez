@@ -1,0 +1,33 @@
+% CIUDADES DE CANADÁ - Con Estructuras y Listas
+
+% --- HECHOS con estructuras de lista ---
+% Formato: conexiones(Ciudad, [destino(Destino, Costo), ...])
+conexiones(vancouver,  [destino(edmonton, 16), destino(calgary, 13)]).
+conexiones(edmonton,   [destino(saskatoon, 12)]).
+conexiones(calgary,    [destino(edmonton, 4),  destino(regina, 14)]).
+conexiones(saskatoon,  [destino(calgary, 9),   destino(winnipeg, 20)]).
+conexiones(regina,     [destino(saskatoon, 7), destino(winnipeg, 4)]).
+
+% --- REGLAS ---
+
+% Obtener conexión directa buscando en la lista con member/2
+conexionDirecta(Origen, Destino, Costo) :-
+    conexiones(Origen, Lista),
+    member(destino(Destino, Costo), Lista).
+
+% ¿Existe conexión directa? (sin importar el costo)
+existeConexion(Origen, Destino) :-
+    conexionDirecta(Origen, Destino, _).
+
+% Nodos conectados desde una ciudad y su costo
+conectadosDesdeyCosto(Origen, Destino, Costo) :-
+    conexionDirecta(Origen, Destino, Costo).
+
+% Ruta con costo total (directa o con intermedios)
+rutaConCosto(Origen, Destino, Costo) :-
+    conexionDirecta(Origen, Destino, Costo).
+
+rutaConCosto(Origen, Destino, CostoTotal) :-
+    conexionDirecta(Origen, Intermedio, C1),
+    rutaConCosto(Intermedio, Destino, C2),
+    CostoTotal is C1 + C2.
