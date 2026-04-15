@@ -1,0 +1,95 @@
+% FAMILIA SIMPSON 
+
+% --- HECHOS con listas ---
+padre_de(homero,   [bart, lisa, maggie]).
+padre_de(abraham,  [herbert, homero]).
+padre_de(clancy,   [patty, marge, selma]).
+
+madre_de(marge,      [bart, lisa, maggie]).
+madre_de(selma,      [ling]).
+madre_de(mona,       [homero, herbert]).
+madre_de(jacqueline, [patty, selma, marge]).
+
+% Género representado como estructura
+genero(abraham,    hombre).
+genero(clancy,     hombre).
+genero(herbert,    hombre).
+genero(homero,     hombre).
+genero(bart,       hombre).
+genero(mona,       mujer).
+genero(jacqueline, mujer).
+genero(marge,      mujer).
+genero(patty,      mujer).
+genero(selma,      mujer).
+genero(lisa,       mujer).
+genero(maggie,     mujer).
+genero(ling,       mujer).
+
+% --- REGLAS usando member/2 ---
+
+% Padre o madre directos
+es_padre(Padre, Hijo) :-
+    padre_de(Padre, Hijos),
+    member(Hijo, Hijos).
+
+es_madre(Madre, Hijo) :-
+    madre_de(Madre, Hijos),
+    member(Hijo, Hijos).
+
+% Progenitor (padre o madre)
+progenitor(P, H) :- es_padre(P, H).
+progenitor(P, H) :- es_madre(P, H).
+
+% Abuelo
+abuelo(Abuelo, Nieto) :-
+    genero(Abuelo, hombre),
+    progenitor(Abuelo, Progenitor),
+    progenitor(Progenitor, Nieto).
+
+% Abuela
+abuela(Abuela, Nieto) :-
+    genero(Abuela, mujer),
+    progenitor(Abuela, Progenitor),
+    progenitor(Progenitor, Nieto).
+
+% Hermano (mismo padre O misma madre, distinta persona, género hombre)
+hermano(H1, H2) :-
+    H1 \= H2,
+    genero(H1, hombre),
+    ( (padre_de(P, Lista), member(H1, Lista), member(H2, Lista))
+    ; (madre_de(M, Lista), member(H1, Lista), member(H2, Lista))
+    ).
+
+% Hermana
+hermana(H1, H2) :-
+    H1 \= H2,
+    genero(H1, mujer),
+    ( (padre_de(P, Lista), member(H1, Lista), member(H2, Lista))
+    ; (madre_de(M, Lista), member(H1, Lista), member(H2, Lista))
+    ).
+
+% Tío
+tio(Tio, Sobrino) :-
+    genero(Tio, hombre),
+    ( hermano(Tio, Padre), es_padre(Padre, Sobrino)
+    ; hermano(Tio, Madre), es_madre(Madre, Sobrino)
+    ).
+
+% Tía
+tia(Tia, Sobrino) :-
+    genero(Tia, mujer),
+    ( hermana(Tia, Padre), es_padre(Padre, Sobrino)
+    ; hermana(Tia, Madre), es_madre(Madre, Sobrino)
+    ).
+
+% Primo (comparten abuelo)
+primo(P1, P2) :-
+    P1 \= P2,
+    progenitor(Padre1, P1),
+    progenitor(Padre2, P2),
+    Padre1 \= Padre2,
+    ( hermano(Padre1, Padre2)
+    ; hermana(Padre1, Padre2)
+    ; hermano(Padre2, Padre1)
+    ; hermana(Padre2, Padre1)
+    ).
